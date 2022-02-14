@@ -14,6 +14,14 @@ Note: 'iponcomp.com' is the english language version of 'ipon.hu'
 * Click on 'List view' icon
 * Click on 'Card view' icon
 
+In this scenario, our test checks if the chosen view option is activated or not, and checks if products has the same options (compare, cart quantity, add to cart) on each view.
+According to specification, list view has no compare option, so it is not a bug not to have a compare button with list view, therefor it is not checked either.
+
 ## Testing price slider
 * Click on minimum side button of the slider and move it right
 * Click on maximum side of the slider and move it left
+
+In this scenario, our test checks price slider filter on desktop fullscreen windowsize. The filter is located on the left side of the page. 
+The test checks if filtering actually happens when the user moves the minimum and maximum buttons, and if filter prices equal filter tag prices. 
+Filter tag appears when one of the slider buttons are moved, and changes according to the sliders movements. 
+
