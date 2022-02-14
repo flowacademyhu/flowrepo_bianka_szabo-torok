@@ -25,3 +25,5 @@ In this scenario, our test checks price slider filter on desktop fullscreen wind
 The test checks if filtering actually happens when the user moves the minimum and maximum buttons, and if filter prices equal filter tag prices. 
 Filter tag appears when one of the slider buttons are moved, and changes according to the sliders movements. 
 
+## Manufacturer Filter
+* Click on 'Manufacturer' button to see the dropdown list

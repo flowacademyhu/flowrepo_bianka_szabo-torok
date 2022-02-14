@@ -1,4 +1,4 @@
-const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, closeBrowser, } = require("taiko");
+const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, closeBrowser, to, } = require("taiko");
 const assert = require("assert");
 const { Console } = require("console");
 const expect = require("chai").expect;
@@ -115,3 +115,10 @@ step("Click on maximum side of the slider and move it left", async function() { 
 });
 
 
+
+step("Click on 'Manufacturer' button to see the dropdown list", async function() {
+	await click(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control`).element(1));
+  let manufacturersArray = (await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li[class="shop-filter-options__item"]`).elements());
+  expect(manufacturersArray).to.have.lengthOf(5);
+  expect(await $(`div.dropdown-control__dropdown.js-dropdown-control-dropdown ul.shop-filter-options-toggle`).isVisible()).to.be.true;
+});
