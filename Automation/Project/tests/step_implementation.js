@@ -1,8 +1,12 @@
-const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, } = require("taiko");
+const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, closeBrowser, } = require("taiko");
 const assert = require("assert");
 const { Console } = require("console");
 const expect = require("chai").expect;
 let activeView = "shop-list__layout-select__item is-active";
+
+afterScenario(async()=>{
+  await closeBrowser()
+});
 
 step("Open browser in headless mode <headless>", async function (headless) {
   let headlessParam = headless.toLowerCase() === "true";
@@ -69,27 +73,27 @@ step("Click on minimum side button of the slider and move it right", async funct
   let itemsCountTextDefault = (await $(`div.shop-list__header__item-count`).text()).split("");
   let itemsCountDefault = [];
   itemsCountDefault.push(itemsCountTextDefault[1], itemsCountTextDefault[2], itemsCountTextDefault[3]);
-  itemsCountDefault = parseInt(itemsCountDefault.join(""));
+  itemsCountDefault = parseInt(itemsCountDefault.join("")); //rows 73-77: Storing itemcount and price sliders lowest price in variables before any change.
   let lowestPriceDefault = parseInt(await $(`aside.sidebar-layout__side.sidebar-layout__side--border.shop-filter-sidebar.js-shop-filter-sidebar div.noUi-handle.noUi-handle-lower`).attribute("aria-valuetext"));
   await mouseAction($(`div[data-collapse-id-value="price"] .noUi-handle.noUi-handle-lower`), 'press', {x:0,y:0});
   await mouseAction($(`div[data-collapse-id-value="price"] .noUi-handle.noUi-handle-lower`), 'move', {x:60,y:0});
-  await mouseAction($(`div[data-collapse-id-value="price"] .noUi-handle.noUi-handle-lower`), 'release', {x:60,y:0});
+  await mouseAction($(`div[data-collapse-id-value="price"] .noUi-handle.noUi-handle-lower`), 'release', {x:60,y:0}); //For some reason, dragAndDrop didn't work for the left side
   let lowestPriceString = await $(`aside.sidebar-layout__side.sidebar-layout__side--border.shop-filter-sidebar.js-shop-filter-sidebar div.noUi-handle.noUi-handle-lower`).attribute("aria-valuetext");
   let lowestPriceFiltered = parseInt(lowestPriceString);
   let itemsCountTextFiltered = (await $(`div.shop-list__header__item-count`).text()).split("");
   let itemsCountFiltered = [];
   itemsCountFiltered.push(itemsCountTextFiltered[1], itemsCountTextFiltered[2], itemsCountTextFiltered[3]);
-  itemsCountFiltered = parseInt(itemsCountFiltered.join(""));
+  itemsCountFiltered = parseInt(itemsCountFiltered.join("")); //rows 81-86: Storing itemcount and price sliders lowest price in variables after minimum slider is moved right.
   expect(lowestPriceFiltered > lowestPriceDefault).to.be.true;
-  expect(itemsCountFiltered <= itemsCountDefault).to.be.true;
-  expect(await (await $(`li.shop-list__filter-tags__item`).element(0)).isVisible()).to.be.true;
+  expect(itemsCountFiltered <= itemsCountDefault).to.be.true; // we expect changes in itemcount and lowest price, altough there is chance that itemcount won't change in some cases. 
+  expect(await (await $(`li.shop-list__filter-tags__item`).element(0)).isVisible()).to.be.true; //pricefilter tag is expected to appear in the header of the page.
   let lowestPriceFilteredString = lowestPriceFiltered.toString();
   let filteredMimimumPriceString = (await(await $(`li.shop-list__filter-tags__item`).element(0)).text());
   let filteredMimimumPriceNoSpaces = filteredMimimumPriceString.replace(/\s+/g, '');
-  expect(filteredMimimumPriceNoSpaces).to.include(lowestPriceFilteredString);
-});
+  expect(filteredMimimumPriceNoSpaces).to.include(lowestPriceFilteredString); //rows 90-93: we check if slider input price matches slider filter tag price 
+}); 
 
-step("Click on maximum side of the slider and move it left", async function() {
+step("Click on maximum side of the slider and move it left", async function() { //assertions are the same as at minimum side slider change
   let itemsCountTextDefault = (await $(`div.shop-list__header__item-count`).text()).split("");
   let itemsCountDefault = [];
   itemsCountDefault.push(itemsCountTextDefault[1], itemsCountTextDefault[2], itemsCountTextDefault[3]);
@@ -109,3 +113,5 @@ step("Click on maximum side of the slider and move it left", async function() {
   let filteredMaximumPriceStringNoSpaces = filteredMaximumPriceString.replace(/\s+/g, '');
   expect(filteredMaximumPriceStringNoSpaces).to.include(highestPriceFilteredString);
 });
+
+
