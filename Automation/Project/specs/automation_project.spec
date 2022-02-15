@@ -27,3 +27,10 @@ Filter tag appears when one of the slider buttons are moved, and changes accordi
 
 ## Manufacturer Filter
 * Click on 'Manufacturer' button to see the dropdown list
+* Click on 'Show all' button
+* Click on a checkbox than another checkbox
+
+## Pickup date filter
+* Click on 'Pickup' button
+* Click on 'Show all' button in 'Pickup' filter
+* Click on a checkbox than another checkbox in 'Pickup filter'

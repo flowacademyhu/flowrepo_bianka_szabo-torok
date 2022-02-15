@@ -69,11 +69,9 @@ Scenario: Category subpages can be reached from homepage
  Scenario: 'Manufacturer' filter with limited number of manufacturers
      Given I am on category page, manufacturer filter is open with limited manufacturers
      When I click on 'Show all' button 
-     Then all available manufacturers appear in a bubble, each with a checkbox
-      But not all manufacturers are visible 
-       But a scroll slider also appears, so I can scroll down and see the remaining manufacturers
-     And a search field is shown inside the bubble, so I am able to search among manufacturers
-     And a 'Less' button is shown 
+     Then all available manufacturers appear in a bubble
+        And a search field is shown inside the bubble, so I am able to search among manufacturers
+        And a 'Less' button is shown 
 
  #003.03
  Scenario: 'Manufacturer' filter with all possible manufacturers
