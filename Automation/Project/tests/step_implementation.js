@@ -1,4 +1,4 @@
-const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, closeBrowser, to, } = require("taiko");
+const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, closeBrowser, to, scrollDown, focus, } = require("taiko");
 const assert = require("assert");
 const { Console } = require("console");
 const expect = require("chai").expect;
@@ -114,11 +114,63 @@ step("Click on maximum side of the slider and move it left", async function() { 
   expect(filteredMaximumPriceStringNoSpaces).to.include(highestPriceFilteredString);
 });
 
-
-
 step("Click on 'Manufacturer' button to see the dropdown list", async function() {
 	await click(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control`).element(1));
   let manufacturersArray = (await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li[class="shop-filter-options__item"]`).elements());
-  expect(manufacturersArray).to.have.lengthOf(5);
-  expect(await $(`div.dropdown-control__dropdown.js-dropdown-control-dropdown ul.shop-filter-options-toggle`).isVisible()).to.be.true;
+  expect(manufacturersArray).to.have.lengthOf(5); //checks if there is a limited number (5) of manufacturers in the dropdown, before we click on "show all" button
+  expect(await $(`div.dropdown-control__dropdown.js-dropdown-control-dropdown ul.shop-filter-options-toggle`).isVisible()).to.be.true; //checks if "show all button is visible"
+  expect(await $(`div.dropdown-control__dropdown.js-dropdown-control-dropdown input[type="checkbox"]`).isVisible()).to.be.true; //checks if checkboxes are visible
 });
+
+step("Click on 'Show all' button", async function() {
+	await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open a.shop-filter-options__show-link`)); 
+  let dropdown = (await $(`div.shop-list__filter.dropdown-control.js-dropdown-control:nth-of-type(2) ul:first-of-type`).attribute("class"));
+  expect(dropdown).to.equal("shop-filter-options shop-filter-options--nested is-show-all");
+  //row 127-129: checks if "Show all" is activated
+  expect(await $(`div.shop-list__filters-order--wrapper div.shop-list__filter.dropdown-control.js-dropdown-control.is-open input[placeholder="Filter..."]`).isVisible()).to.be.true
+  //row130 checks if filter inputfield is visible
+  await hover($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item.shop-filter-options__item--show-less`))
+  expect(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item.shop-filter-options__item--show-less`).isVisible()).to.be.true
+  //row132-133: checks if "less" button is visible
+});
+
+step("Click on a checkbox than another checkbox", async function() {
+  let itemsCountDefault = await ($(`div.shop-list__header__item-count`).text());
+  await hover($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(4) span.control__indicator`))
+	await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(8) span.control__indicator`));
+  await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(10) span.control__indicator`));
+  let itemsCountFiltered = await ($(`div.shop-list__header__item-count`).text()); //rows 139-141: checks if checkboxes are clickable with multiple checkbox clicked
+  expect(itemsCountDefault).to.not.equal(itemsCountFiltered) // checks if itemscount changed after filtering by checkboxes
+});
+
+
+step("Click on 'Pickup' button", async function() {
+	await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control:nth-of-type(3)`));
+  let pickupArray = (await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li[class="shop-filter-options__item"]`).elements());
+  expect(pickupArray).to.have.lengthOf(5); //checks if there is a limited number (5) of manufacturers in the dropdown, before we click on "show all" button
+  expect(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open ul.shop-filter-options-toggle`).isVisible()).to.be.true; //checks if "show all button is visible"
+  expect(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open span.control__indicator`).isVisible()).to.be.true; //checks if checkboxes are visible
+});
+
+step("Click on 'Show all' button in 'Pickup' filter", async function() {
+	await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open a.shop-filter-options__show-link`)); 
+  let dropdown = (await $(`div.shop-list__filter.dropdown-control.js-dropdown-control:nth-of-type(3) ul:first-of-type`).attribute("class"));
+  expect(dropdown).to.equal("shop-filter-options shop-filter-options--nested is-show-all");
+  //row 156-158: checks if "Show all" is activated
+  expect(await $(`div.shop-list__filters-order--wrapper div.shop-list__filter.dropdown-control.js-dropdown-control.is-open input[placeholder="Filter..."]`).isVisible()).to.be.true
+  //row 161 checks if filter inputfield is visible
+  await hover($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item.shop-filter-options__item--show-less`))
+  expect(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item.shop-filter-options__item--show-less`).isVisible()).to.be.true
+  //row 162-163: checks if "less" button is visible;
+});
+
+
+step("Click on a checkbox than another checkbox in 'Pickup filter'", async function() {
+	let itemsCountDefault = await ($(`div.shop-list__header__item-count`).text());
+  await hover($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(2) span.control__indicator`))
+	await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(6) span.control__indicator`));
+  await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(8) span.control__indicator`));
+  let itemsCountFiltered = await ($(`div.shop-list__header__item-count`).text()); //rows 170-172: checks if checkboxes are clickable with multiple checkbox clicked
+  expect(itemsCountDefault).to.not.equal(itemsCountFiltered) // checks if itemscount changed after filtering by checkboxes;
+});
+
