@@ -149,17 +149,17 @@ Scenario: Category subpages can be reached from homepage
  Scenario Outline: There are multiple yes/no/all radiobutton filters on the category page
      Given I am on the category page
      When I click on <filter> dropdown filter menu
-      And I click on  one of the three <radio> options inside the filter
+      And I click on  one of the three radio options inside the filter
      Then I should see a list of products that match the chosen filter and subfilter
      Examples:
-            | filter     | radio |
-            | VGA/D-SUB  | all   |
-            | DVI        | yes   |
-            | Mini HDMI  | no    |
-            | Micro HDMI |       | 
-            | LHR        |       |
-            | iPon Gamer |       |
-            | Silent     |       |
+            | filter     |
+            | VGA/D-SUB  |
+            | DVI        |
+            | Mini HDMI  |
+            | Micro HDMI | 
+            | LHR        |
+            | iPon Gamer |
+            | Silent     |
 
 #008
  

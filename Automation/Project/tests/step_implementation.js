@@ -1,8 +1,7 @@
 const path = require("path");
-const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, closeBrowser, to, scrollDown, focus, scrollUp, reload, press, write, } = require("taiko");
+const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, closeBrowser, to, scrollDown, focus, scrollUp, reload, press, write, clear, } = require("taiko");
 const assert = require("assert");
 const { Console } = require("console");
-const { equal } = require("assert");
 const expect = require("chai").expect;
 const headless = process.env.headless_chrome.toLowerCase() === "true";
 
@@ -198,12 +197,12 @@ step("Click on ordering options <table>", {continueOnFailure: true}, async funct
   };
 });
 
-
 step("Click in the search input", async function() {
   await hover($(`input[placeholder="Search in category..."]`));
   await scrollUp();
   await click($(`input[placeholder="Search in category..."]`));
 });
+
 
 step("Write <word> in the search field", async function(word) {
   let itemsCountDefault = await $(`div.shop-list__header__item-count`).text()
@@ -211,5 +210,70 @@ step("Write <word> in the search field", async function(word) {
   await press('Enter');
   let itemsCountFiltered = await $(`div.shop-list__header__item-count`).text()
   assert.notEqual(itemsCountDefault, itemsCountFiltered);
+  await clear($(`input.shop-list__search__input.js-width-dynamic`));
+  await press('Enter');
 });
 
+
+step("Scroll down to the bottom of product list", async function() {
+	await hover ($(`div.product-list__show-more-button-wrapper`));
+  let showMore = await $(`div.product-list__show-more-button-wrapper`).isVisible();
+  let previousPageButton = await $(`div.forum-pagination.forum-pagination--messages button:first-of-type`).attribute("class");
+  expect(showMore).to.be.true; 
+  expect(previousPageButton).to.equal("forum-pagination__button--prev forum-pagination__button button");
+  let itemsCountText = (await $(`div.shop-list__header__item-count`).text()).split("");
+  let itemsCount = [];
+  itemsCount.push(itemsCountText[1], itemsCountText[2], itemsCountText[3]);
+  itemsCount = parseInt(itemsCount.join(""));
+  let numberOfPages = parseInt(await $(`span.forum-pagination__pages-all`).text());
+  expect(Math.ceil(itemsCount/36)).to.equal(numberOfPages);
+});
+
+step("Click on 'next page' button", async function() {
+	await click($(`button[class*="forum-pagination__button--next forum-pagination__button button"]`));
+  await hover ($(`div.product-list__show-more-button-wrapper`));
+  let showMore = await $(`div.product-list__show-more-button-wrapper`).isVisible();
+  let previousPageButton = await $(`div.forum-pagination.forum-pagination--messages button:first-of-type`).attribute("class");
+  expect(showMore).to.be.true; 
+  expect(previousPageButton).to.equal("forum-pagination__button--prev forum-pagination__button button forum-pagination__button--active");
+});
+
+step("Check if there is a 4th page, if yes click on it", async function() {
+  let numberOfPages = parseInt(await $(`span.forum-pagination__pages-all`).text());
+	if(numberOfPages > 3){
+    let nextPageButton = await $(`div.forum-pagination.forum-pagination--messages button:last-of-type`).attribute("class");
+    await click($(`button[class*="forum-pagination__button--next forum-pagination__button button"]`));
+    expect(nextPageButton).to.equal("forum-pagination__button--next forum-pagination__button button"); 
+  };
+  await clear($(`input.forum-pagination__pages-input`));
+  await write('1', $(`input.forum-pagination__pages-input`));
+  await press('Enter');
+});
+
+
+step("Click on dropdown filter menus and click on radio buttons: <bt1> <bt2> <bt3> options inside <table>", async function(bt1, bt2, bt3, table){
+  await click($(`div[data-collapse-id-value="price"] i[class="fas fa-angle-up"]`));
+  await focus($(`div[data-collapse-id-value="brand"] i[class="fas fa-angle-up"]`));
+  await click($(`div[data-collapse-id-value="brand"] i[class="fas fa-angle-up"]`));
+  await focus($(`div[data-collapse-id-value="day"] i[class="fas fa-angle-up"]`));
+  await click($(`div[data-collapse-id-value="day"] i[class="fas fa-angle-up"]`));
+  await focus($(`div[data-collapse-id-value="guarantee-month"] i[class="fas fa-angle-up"]`));
+  await click($(`div[data-collapse-id-value="guarantee-month"] i[class="fas fa-angle-up"]`));
+  await focus($(`div[data-collapse-id-value="feature-38"] i[class="fas fa-angle-up"]`));
+  await click($(`div[data-collapse-id-value="feature-38"] i[class="fas fa-angle-up"]`));
+  for (var row of table.rows) {
+    await focus(row.cells[0]);
+	  await click(row.cells[0]);
+    await click(bt1);
+    let itemsCountTextFilteredAll = await $(`div.shop-list__header__item-count`).text();
+    await click(bt2);
+    let itemsCountTextFilteredYes = await $(`div.shop-list__header__item-count`).text();
+    assert.notEqual(itemsCountTextFilteredAll, itemsCountTextFilteredYes);
+    await click(bt3);
+    let itemsCountFilteredNo = await $(`div.shop-list__header__item-count`).text();
+    assert.notEqual(itemsCountTextFilteredYes,itemsCountFilteredNo);
+    await focus(row.cells[0]);
+    await scrollUp()
+    await click(row.cells[0]);
+  }
+});
