@@ -47,6 +47,27 @@ Click on 'Cheap first' option
    |Discount       |
    |Popular first  |
 
-## Search in category 
+## Search in category
 * Click in the search input
 * Write "asus" in the search field
+
+## Testing radio button filters
+* Click on dropdown filter menus and click on radio buttons: "all" "yes" "no" options inside
+
+   |filter    |
+   |----------|
+   |VGA/D-SUB |
+   |DVI       |
+   |Mini HDMI |
+   |Micro HDMI|
+   |LHR       |
+   |iPon Gamer|
+   |Silent    |
+
+## Pagination at the bottom of the page
+* Scroll down to the bottom of product list
+* Click on 'next page' button
+* Click on 'next page' button
+* Click on 'next page' button
+* Check if there is a 4th page, if yes click on it
+
