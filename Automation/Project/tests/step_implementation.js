@@ -1,5 +1,5 @@
 const path = require("path");
-const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, closeBrowser, to, scrollDown, focus, scrollUp, reload, press, write, clear, } = require("taiko");
+const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, closeBrowser, to, scrollDown, focus, scrollUp, reload, press, write, clear, resizeWindow, } = require("taiko");
 const assert = require("assert");
 const { Console } = require("console");
 const expect = require("chai").expect;
@@ -11,7 +11,7 @@ beforeSuite(async () => {
   })
   await goto('iponcomp.com');
   await hover($(`span.site-nav__shop-menu.js-shop-menu-trigger`));
-  await hover((await $(`.menu__link--label`).elements())[1]);
+  await hover((await $(`span.menu__link--label`).elements())[1]);
   await click(link('Gamer videocard'));
 });
 
@@ -183,18 +183,39 @@ step("Click on 'Order' dropdown menu", async function() {
   expect(defaultOrderText).to.contain("Popular first"); // checks if "Popular first" order is default
 });
 
-/*step("Click on 'Cheap first' option", {continueOnFailure: true}, async function() {
+step("Click on 'Cheap first' option", async function() {
   let itemsCountDefault = await ($(`div.shop-list__header__item-count`)).text();
-	await click($(`option[value:'olcso']`));
+	await press("ArrowDown");
+  await press("Enter");
   let itemsCountFiltered = await ($(`div.shop-list__header__item-count`)).text();
   expect(itemsCountDefault).to.equal(itemsCountFiltered);
-});*/
+});
 
+step("Click on 'Expensive first' option", async function() {
+	let itemsCountDefault = await ($(`div.shop-list__header__item-count`)).text();
+  await click($(`div[class="select-input shop-list__order-select select-input--order-icon@mobile"]`));
+	await press("ArrowDown");
+  await press("Enter")
+  let itemsCountFiltered = await ($(`div.shop-list__header__item-count`)).text();
+  expect(itemsCountDefault).to.equal(itemsCountFiltered);
+});
 
-step("Click on ordering options <table>", {continueOnFailure: true}, async function(table) {
-  for (let row of table.rows) {
-    await click(row.cells[0]);
-  };
+step("Click on 'Newest first' option", async function() {
+	let itemsCountDefault = await ($(`div.shop-list__header__item-count`)).text();
+  await click($(`div[class="select-input shop-list__order-select select-input--order-icon@mobile"]`));
+	await press("ArrowDown");
+  await press("Enter")
+  let itemsCountFiltered = await ($(`div.shop-list__header__item-count`)).text();
+  expect(itemsCountDefault).to.equal(itemsCountFiltered);
+});
+
+step("Click on 'Discount' option", async function() {
+	let itemsCountDefault = await ($(`div.shop-list__header__item-count`)).text();
+  await click($(`div[class="select-input shop-list__order-select select-input--order-icon@mobile"]`));
+	await press("ArrowDown");
+  await press("Enter")
+  let itemsCountFiltered = await ($(`div.shop-list__header__item-count`)).text();
+  expect(itemsCountDefault).to.equal(itemsCountFiltered);
 });
 
 step("Click in the search input", async function() {
@@ -263,17 +284,106 @@ step("Click on dropdown filter menus and click on radio buttons: <bt1> <bt2> <bt
   await click($(`div[data-collapse-id-value="feature-38"] i[class="fas fa-angle-up"]`));
   for (var row of table.rows) {
     await focus(row.cells[0]);
+    await scrollUp(800)
 	  await click(row.cells[0]);
-    await click(bt1);
     let itemsCountTextFilteredAll = await $(`div.shop-list__header__item-count`).text();
     await click(bt2);
     let itemsCountTextFilteredYes = await $(`div.shop-list__header__item-count`).text();
     assert.notEqual(itemsCountTextFilteredAll, itemsCountTextFilteredYes);
+    await focus(bt3);
     await click(bt3);
     let itemsCountFilteredNo = await $(`div.shop-list__header__item-count`).text();
     assert.notEqual(itemsCountTextFilteredYes,itemsCountFilteredNo);
+    await click(bt1);
     await focus(row.cells[0]);
-    await scrollUp()
+    await scrollUp(800)
     await click(row.cells[0]);
   }
 });
+
+step("Click on 'compare' checkbox inside a product card", async function() {
+	await hover($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12`));
+  await click($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:first-of-type span.control__indicator`));
+  await hover($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:nth-of-type(4)`));
+  await click($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:nth-of-type(4) span.control__indicator`));
+  //compare bar won't appear
+});
+
+
+step("Hover over a product and click on 'Add to cart' button", async function() {
+	await hover($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12`));
+  await click($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:first-of-type a[title="To cart"]`));
+  expect(await $(`aside.sidebar-layout__side.sidebar-layout__side--border.basket-sidebar.js-basket-sidebar.js-state--visible`).isDisabled()).to.be.false;
+  expect(await $(`div.spinner-input.basket-card__quantity__input.js-spinner`).isVisible()).to.be.true;
+  expect(await $(`a.basket-card__remove`).isDisabled()).to.be.false;
+  expect(await $(`div.shop-scroll.shop-scroll--basket`).isDisabled()).to.be.false;
+  expect(await $(`a[href="/shop/checkout"]`).isDisabled()).to.be.false;
+  expect(await $(`a.basket__full-link`).isDisabled()).to.be.false;
+});
+
+step("Click 'Delete all' button to empty the cart", async function() {
+  await click($(`a.basket__delete-all-link`));
+  let cancelText = await $(`a.basket-card--removed__title-link:last-of-type`).text();
+  assert.equal(cancelText, "Cancel");
+  await click($(`a.basket__full-link`));
+  await hover($(`span.site-nav__shop-menu.js-shop-menu-trigger`));
+  await hover((await $(`.menu__link--label`).elements())[1]);
+  await click(link('Gamer videocard'));
+});
+
+
+step("Click on subcategory", async function() {
+  await resizeWindow({width:1600, height:1024});
+	await hover($(`ul.shop-filter-categories`));
+  let chipsetFilters = await $(`li.shop-filter-categories__item`).elements();
+  let itemsCountDefault = await $(`div.shop-list__header__item-count`).text();
+  await click(chipsetFilters[Math.floor(Math.random() * chipsetFilters.length)]);
+  let itemsCountFiltered = await $(`div.shop-list__header__item-count`).text();
+  assert.notEqual(itemsCountDefault, itemsCountFiltered);
+});
+
+step("Scroll to bottom of the page", async function() {
+	await focus($(`div.site-footer__header`));
+});
+
+step("Click on 'Back to top of the page button'", async function() {
+	await click($(`a.site-footer__back-to-top-link.js-site-footer-back-to-top-link`), {waitFor: ["targetNavigated"]});
+  expect(await $(`h1.shop-list__header__title`).isVisible()).to.be.true;
+});
+
+
+step("Click on first supreme category in breadcrumbs", async function() {
+  await focus($(`li.breadcrumb__item.breadcrumb__item--active`));
+	let breadcrumbsElements = await $(`li[class*="breadcrumb__item"`).elements();
+  expect(breadcrumbsElements.length).to.equal(4);
+  let breadcrumbLast = $(`li[class*="breadcrumb__item"]:last-of-type`);
+  let breadcrumbParent = $(`li[class*="breadcrumb__item"]:nth-of-type(3)`);
+  assert.equal((await (breadcrumbLast).text()), ("Gamer videocard"));
+  assert.equal((await (breadcrumbLast).attribute("class")), "breadcrumb__item breadcrumb__item--active");
+  assert.equal(await breadcrumbParent.attribute("class"), "breadcrumb__item breadcrumb__item--parent");
+  await click($(`li[class*="breadcrumb__item"]:nth-of-type(3)`));
+});
+
+
+step("Click on second supreme category in breadcrumbs (originally first parent category)", async function() {
+	let breadcrumbsElements = await $(`li[class*="breadcrumb__item"`).elements();
+  expect(breadcrumbsElements.length).to.equal(3);
+  let breadcrumbLast = $(`li[class*="breadcrumb__item"]:last-of-type`);
+  let breadcrumbParent = $(`li[class*="breadcrumb__item"]:nth-of-type(2)`);
+  assert.equal((await (breadcrumbLast).text()), ("PC accessories"));
+  assert.equal((await (breadcrumbLast).attribute("class")), "breadcrumb__item breadcrumb__item--active");
+  assert.equal(await breadcrumbParent.attribute("class"), "breadcrumb__item breadcrumb__item--parent");
+  await click($(`li[class*="breadcrumb__item"]:nth-of-type(2)`));
+});
+
+step("Click on third supreme category in breadcrumbs", async function() {
+	let breadcrumbsElements = await $(`li[class*="breadcrumb__item"`).elements();
+  expect(breadcrumbsElements.length).to.equal(2);
+  let breadcrumbLast = $(`li[class*="breadcrumb__item"]:last-of-type`);
+  let breadcrumbParent = $(`li[class*="breadcrumb__item"]:first-of-type`);
+  assert.equal((await (breadcrumbLast).text()), ("Shop"));
+  assert.equal((await (breadcrumbLast).attribute("class")), "breadcrumb__item breadcrumb__item--active");
+  assert.equal(await breadcrumbParent.attribute("class"), "breadcrumb__item breadcrumb__item--parent");
+  await click($(`li[class*="breadcrumb__item"]:first-of-type`));
+});
+

@@ -158,7 +158,6 @@ Scenario: Category subpages can be reached from homepage
             | Mini HDMI  |
             | Micro HDMI | 
             | LHR        |
-            | iPon Gamer |
             | Silent     |
 
 #008
@@ -196,7 +195,8 @@ Scenario: Category subpages can be reached from homepage
      When I move the mouse cursor over a product 
       And click on the checkbox in front of 'Compare'
       And I do the same with another product
-     Then a white bar should appear at the bottom of the screen. The bar shows the chosen products with the productname, a product picture, an X to delete the product from compare, 
+     Then a white bar should appear at the bottom of the screen. The bar shows the chosen products 
+          with the productname, a product picture, an X to delete the product from compare, 
           two more free spaces for additional products and a compare button
  
  #009.002
@@ -208,7 +208,8 @@ Scenario: Category subpages can be reached from homepage
       And a 'Copy link' button with an icon showing two chainlinks should be visible
       And a 'Delete all' button with an icon showing a trashbin should be visible
 
-     Test note: Users can use the Compare checkbox at any products, but only 4 (first 4) products are shown on the compare page 
+     Test note: Users can use the Compare checkbox at any products, 
+                but only 4 (first 4) products are shown on the compare page 
 
 #010
 
@@ -217,18 +218,21 @@ Scenario: Category subpages can be reached from homepage
      When I move my mouse over a product
       And I click on the 'To cart' button
      Then a screen with cart contents should be shown
-      And content of the cart should be changable by number of products, delete product(s), adding more products from recommended products carousel
+      And content of the cart should be changable by number of products, delete product(s), 
+          adding more products from recommended products carousel
       And a 'purchase' button is shown
       And 'check full cart' button is shown
 
 #011
 
- Scenario: Subcategories can be used on category page (subcategories are chipset manufacturers at video card subpage)
-     Given I am on video card category page, gamer filter is active, subcategory buttons are on the left side of the page
+ Scenario: Subcategories can be used on category page 
+           (subcategories are chipset manufacturers at video card subpage)
+     Given I am on video card category page, gamer filter is active, 
+           subcategory buttons are on the left side of the page
      When I click on a subcategory
      Then A loading icon appears next to the name of the subcategory
       And Products according to the chosen subcategory and 'gamer' filter should be shown 
-      But chosing a subcategory disables gamer filter
+      But choosing a subcategory disables gamer filter
 
 #012
 
