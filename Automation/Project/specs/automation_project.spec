@@ -36,16 +36,10 @@ Filter tag appears when one of the slider buttons are moved, and changes accordi
 
 ## Order menu (sorting product list)
 * Click on 'Order' dropdown menu
-Click on 'Cheap first' option
-* Click on ordering options
-
-   |description    |
-   |---------------|
-   |Cheap first    |
-   |Expensive first|
-   |Newest first   |
-   |Discount       |
-   |Popular first  |
+* Click on 'Cheap first' option
+* Click on 'Expensive first' option
+* Click on 'Newest first' option
+* Click on 'Discount' option
 
 ## Search in category
 * Click in the search input
@@ -61,7 +55,6 @@ Click on 'Cheap first' option
    |Mini HDMI |
    |Micro HDMI|
    |LHR       |
-   |iPon Gamer|
    |Silent    |
 
 ## Pagination at the bottom of the page
@@ -70,4 +63,23 @@ Click on 'Cheap first' option
 * Click on 'next page' button
 * Click on 'next page' button
 * Check if there is a 4th page, if yes click on it
+
+## Comparing products
+* Click on 'compare' checkbox inside a product card
+
+## Add to cart from product list
+* Hover over a product and click on 'Add to cart' button
+* Click 'Delete all' button to empty the cart
+
+## Testing chipset manufacturer filter
+* Click on subcategory
+
+## Testing 'Back to top of the page' button
+* Scroll to bottom of the page
+* Click on 'Back to top of the page button'
+
+## Testing Breadcrumbs option
+* Click on first supreme category in breadcrumbs
+* Click on second supreme category in breadcrumbs (originally first parent category)
+* Click on third supreme category in breadcrumbs
 
