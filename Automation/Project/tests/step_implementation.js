@@ -1,5 +1,6 @@
 const path = require("path");
-const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, closeBrowser, to, scrollDown, focus, scrollUp, reload, press, write, clear, resizeWindow, } = require("taiko");
+const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, closeBrowser, to, scrollDown, focus, scrollUp, reload, 
+        press, write, clear, resizeWindow, scrollTo, } = require("taiko");
 const assert = require("assert");
 const { Console } = require("console");
 const expect = require("chai").expect;
@@ -9,6 +10,7 @@ beforeSuite(async () => {
   await openBrowser({
       headless: headless
   })
+  await resizeWindow({width: 1300, height: 900});
   await goto('iponcomp.com');
   await hover($(`span.site-nav__shop-menu.js-shop-menu-trigger`));
   await hover((await $(`span.menu__link--label`).elements())[1]);
@@ -299,19 +301,75 @@ step("Click on dropdown filter menus and click on radio buttons: <bt1> <bt2> <bt
     await scrollUp(800)
     await click(row.cells[0]);
   }
+  await focus($(`li.shop-list__filter-tags__item:first-of-type i.fas.fa-times.shop-list__filter-tags__icon`));
+  await click($(`li.shop-list__filter-tags__item:first-of-type i.fas.fa-times.shop-list__filter-tags__icon`));
 });
 
 step("Click on 'compare' checkbox inside a product card", async function() {
-	await hover($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12`));
-  await click($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:first-of-type span.control__indicator`));
-  await hover($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:nth-of-type(4)`));
-  await click($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:nth-of-type(4) span.control__indicator`));
-  //compare bar won't appear
+    await hover($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12`));
+    await click($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:first-of-type span.control__indicator`));
+  if ((await $(`div.shop-compare-dock.js-shop-compare-dock.shop-compare-dock--unpinned`).exists()) === false) {    
+    let compareBoxes = await $(`div.shop-compare-dock__item.compare-dock-card`).elements(); 
+    let compareRemaining = await $(`div.shop-compare-dock__item.shop-compare-dock__item--placeholder`).elements();
+    expect(compareBoxes).to.have.lengthOf(1);
+    expect(compareRemaining).to.have.lengthOf(3);  
+  } else {
+    console.log("Bug detected! Compare bar missing, further steps cannot be executed.");
+  }
 });
 
+step("Click on an other products 'compare' checkbox", async function() {
+    await hover($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:nth-of-type(4)`));
+    await click($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:nth-of-type(4) span.control__indicator`));
+  if ((await $(`div.shop-compare-dock.js-shop-compare-dock.shop-compare-dock--unpinned`).exists()) === false) {	  
+    compareBoxes = await $(`div.shop-compare-dock__item.compare-dock-card`).elements();
+    compareRemaining = await $(`div.shop-compare-dock__item.shop-compare-dock__item--placeholder`).elements();
+    expect(compareBoxes).to.have.lengthOf(2);
+    expect(compareRemaining).to.have.lengthOf(2);
+    await click($(`a.shop-compare-dock__compare-button.button.button--secondary`));
+} else {
+  console.log("Bug detected! Step: 'Click on an other products 'compare' checkbox' cannot be executed");
+}
+});
+
+step("Click on 'Compare' in the bar at the bottom of the screen", async function() {
+  if ((await $(`div.shop-compare-dock.js-shop-compare-dock.shop-compare-dock--unpinned`).exists()) === false) {
+	  await click($(`a.shop-compare-dock__compare-button.button.button--secondary`));
+    let breadcrumbsElements = await $(`li.breadcrumb__item`).elements();
+    let pageTitle = await $(`h1.page__title`).text();
+    expect(breadcrumbsElements).to.have.lengthOf(5);
+    assert.equal(pageTitle, "Compare");
+    let compareColumns = await $(`div.shop-compare__content th.shop-compare__th`).elements();
+    expect(compareColumns).to.have.lengthOf(3);
+    expect(await $(`li.shop-compare__header-links__item:first-of-type span.action-link__text`).isVisible()).to.be.true;
+    expect(await $(`li.shop-compare__header-links__item:last-of-type span.action-link__text`).isVisible()).to.be.true;
+    assert.equal(await $(`li.shop-compare__header-links__item:first-of-type span.action-link__text`).text(), "Copy link");
+    assert.equal(await $(`li.shop-compare__header-links__item:last-of-type span.action-link__text`).text(), "Delete all");
+    expect(await $(`div.shop-compare__content th.shop-compare__th:nth-of-type(2) i.fas.fa-arrow-right.button__icon`).isVisible()).to.be.true;
+    expect(await $(`div.shop-compare__content th.shop-compare__th:nth-of-type(3) i.fas.fa-arrow-right.button__icon`).isVisible()).to.be.true;
+} else {
+  console.log("Bug detected! Step: 'Click on 'Compare' in the bar at the bottom of the screen' cannot be executed");
+}
+});
+
+step("Click on 'Delete all' button", async function() {
+  if ((await $(`li.breadcrumb__item.breadcrumb__item--active`).text()) === "Compare") {
+  	await click($(`li.shop-compare__header-links__item:last-of-type span.action-link__text`));
+    expect(await $(`li.shop-list__filter-tags__item`).isDisabled()).to.be.true;
+    await click($(`div[data-collapse-id-value="feature-545"]`));
+    await click($(`div[data-collapse-id-value="feature-545"] li.shop-filter-options__item:nth-of-type(2) span.control__indicator`));
+} else {
+  console.log("Bug detected! Step: 'Click on 'Delete all' button' cannot be executed");
+  await goto('https://iponcomp.com/shop/group/pc-accessories/gamer-videocard/18215');
+} 
+});
 
 step("Hover over a product and click on 'Add to cart' button", async function() {
-	await hover($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12`));
+  await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control:nth-of-type(3)`));
+  await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open a.shop-filter-options__show-link:last-of-type`));
+  await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li[class*="shop-filter-options__item is-hidden"]:last-of-type span.control__indicator`));
+  await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open`));
+  await hover($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:first-of-type`));
   await click($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:first-of-type a[title="To cart"]`));
   expect(await $(`aside.sidebar-layout__side.sidebar-layout__side--border.basket-sidebar.js-basket-sidebar.js-state--visible`).isDisabled()).to.be.false;
   expect(await $(`div.spinner-input.basket-card__quantity__input.js-spinner`).isVisible()).to.be.true;
@@ -333,22 +391,21 @@ step("Click 'Delete all' button to empty the cart", async function() {
 
 
 step("Click on subcategory", async function() {
-  await resizeWindow({width:1600, height:1024});
 	await hover($(`ul.shop-filter-categories`));
   let chipsetFilters = await $(`li.shop-filter-categories__item`).elements();
   let itemsCountDefault = await $(`div.shop-list__header__item-count`).text();
   await click(chipsetFilters[Math.floor(Math.random() * chipsetFilters.length)]);
   let itemsCountFiltered = await $(`div.shop-list__header__item-count`).text();
-  assert.notEqual(itemsCountDefault, itemsCountFiltered);
+  expect(itemsCountDefault >= itemsCountFiltered);
 });
 
 step("Scroll to bottom of the page", async function() {
-	await focus($(`div.site-footer__header`));
+	await scrollTo($(`div.site-footer__header`));
 });
 
 step("Click on 'Back to top of the page button'", async function() {
-	await click($(`a.site-footer__back-to-top-link.js-site-footer-back-to-top-link`), {waitFor: ["targetNavigated"]});
-  expect(await $(`h1.shop-list__header__title`).isVisible()).to.be.true;
+	await click($(`a.site-footer__back-to-top-link.js-site-footer-back-to-top-link`));
+  expect(await $(`li.breadcrumb__item.breadcrumb__item--active`).isVisible()).to.be.true;
 });
 
 
@@ -385,5 +442,80 @@ step("Click on third supreme category in breadcrumbs", async function() {
   assert.equal((await (breadcrumbLast).attribute("class")), "breadcrumb__item breadcrumb__item--active");
   assert.equal(await breadcrumbParent.attribute("class"), "breadcrumb__item breadcrumb__item--parent");
   await click($(`li[class*="breadcrumb__item"]:first-of-type`));
+  await hover($(`span.site-nav__shop-menu.js-shop-menu-trigger`));
+  await hover((await $(`span.menu__link--label`).elements())[1]);
+  await click(link('Gamer videocard'));
 });
 
+
+step("Click on hamburger menu icon", async function() {
+	await click($(`a.site-nav__hamburger.js-site-nav__hamburger`));
+  let hamburgerClass = await $(`a.site-nav__hamburger.js-site-nav__hamburger>div`).attribute("class");
+  assert.equal(hamburgerClass, "hamburger hamburger--slider site-nav__hamburger__icon js-site-nav__hamburger__icon is-active");
+  let menuClass = await $(`body.is-menu-overlay-visible header nav`).attribute("class");
+  assert.equal(menuClass, "main-menu js-main-menu is-open");
+  let menuColumns = await $(`ul.main-menu__list`).elements();
+  expect(menuColumns.length).to.equal(5);
+  let shopColumnItems = await $(`ul.main-menu__list:first-of-type li.main-menu__item`).elements();
+  expect(shopColumnItems.length).to.equal(19);
+  let secondColumnItems = await $(`ul.main-menu__list:nth-of-type(2) li.main-menu__item`).exists();
+  expect(secondColumnItems).to.be.false;
+  let extrasColumnItems = await $(`ul.main-menu__list:nth-of-type(3) li.main-menu__item`).elements();
+  expect(extrasColumnItems.length).to.equal(2);
+  let myProfileColumnItems = await $(`ul.main-menu__list:nth-of-type(4) li.main-menu__item`).elements();
+  expect(myProfileColumnItems.length).to.equal(1);
+  let otherColumsItems = await $(`ul.main-menu__list:last-of-type li.main-menu__item`).elements();
+  expect(otherColumsItems.length).to.equal(5);
+});
+
+step("Click again to close hamburger menu", async function() {
+	await click($(`a.site-nav__hamburger.js-site-nav__hamburger`));
+  let hamburgerClass = await $(`a.site-nav__hamburger.js-site-nav__hamburger>div`).attribute("class");
+  assert.equal(hamburgerClass, "hamburger hamburger--slider site-nav__hamburger__icon js-site-nav__hamburger__icon");
+});
+
+
+step("Check default highlights", async function() {
+	await scrollTo($(`div.product-list__show-more-button-wrapper`));
+  let recommendedDefault = await $(`section.shop-section.shop-section--product-list-scroll:nth-child(2) div[class*="shop-scroll__item u-content-card-hover slick-slide slick-"]`).elements();
+  expect(recommendedDefault.length).to.equal(5);
+  let carouselRightButton = $(`section.shop-section.shop-section--product-list-scroll:nth-child(2) span.shop-scroll__scroll-btn-overlay.shop-scroll__scroll-btn-overlay--right`);
+  let carouselLeftButton = $(`section.shop-section.shop-section--product-list-scroll:nth-child(2) span.shop-scroll__scroll-btn-overlay.shop-scroll__scroll-btn-overlay--left`);
+  expect(await carouselRightButton.isDisabled()).to.be.false;
+  expect(await carouselLeftButton.isVisible()).to.be.false;
+});
+
+step("Click right button on the carousel", async function() {
+	await click($(`section.shop-section.shop-section--product-list-scroll:nth-child(2) span.shop-scroll__scroll-btn-overlay.shop-scroll__scroll-btn-overlay--right`));
+  let carouselLeftButton = $(`section.shop-section.shop-section--product-list-scroll:nth-child(2) span.shop-scroll__scroll-btn-overlay.shop-scroll__scroll-btn-overlay--left`);
+  let carouselRightButton = $(`section.shop-section.shop-section--product-list-scroll:nth-child(2) span.shop-scroll__scroll-btn-overlay.shop-scroll__scroll-btn-overlay--right`);
+  expect(await carouselLeftButton.isDisabled()).to.be.false;
+  let numberOfHighlighted = (await $(`section.shop-section.shop-section--product-list-scroll:nth-child(2) div[class*="shop-scroll__item u-content-card-hover slick-slide"]`).elements()).length;
+  let possibleRightClicks = Math.ceil(numberOfHighlighted/5);
+  for (let i = 3; i = possibleRightClicks; i++) {
+    if (await carouselRightButton.isVisible() === true){
+      await click(carouselRightButton);
+    } else {
+      break;
+    }
+  }
+  expect(await carouselRightButton.isVisible()).to.be.false;
+  expect(await carouselLeftButton.isVisible()).to.be.true;
+});
+
+
+step("Click on left button on the carousel", async function() {
+	let carouselLeftButton = $(`section.shop-section.shop-section--product-list-scroll:nth-child(2) span.shop-scroll__scroll-btn-overlay.shop-scroll__scroll-btn-overlay--left`);
+  let carouselRightButton = $(`section.shop-section.shop-section--product-list-scroll:nth-child(2) span.shop-scroll__scroll-btn-overlay.shop-scroll__scroll-btn-overlay--right`);
+  let numberOfHighlighted = (await $(`section.shop-section.shop-section--product-list-scroll:nth-child(2) div[class*="shop-scroll__item u-content-card-hover slick-slide"]`).elements()).length;
+  let possibleLeftClicks = Math.ceil(numberOfHighlighted/5);
+  for (let i = 2; i = possibleLeftClicks; i++) {
+    if (await carouselLeftButton.isVisible() === true){
+      await click(carouselLeftButton);
+    } else {
+      break;
+    }
+  }
+  expect(await carouselRightButton.isVisible()).to.be.true;
+  expect(await carouselLeftButton.isVisible()).to.be.false;
+});
