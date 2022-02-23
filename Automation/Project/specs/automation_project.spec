@@ -65,10 +65,15 @@ Filter tag appears when one of the slider buttons are moved, and changes accordi
 * Check if there is a 4th page, if yes click on it
 
 ## Comparing products
+Tags: bug 
 * Click on 'compare' checkbox inside a product card
+* Click on an other products 'compare' checkbox
+* Click on 'Compare' in the bar at the bottom of the screen
+* Click on 'Delete all' button
 
 ## Add to cart from product list
 * Hover over a product and click on 'Add to cart' button
+B2B products cannot be added to cart
 * Click 'Delete all' button to empty the cart
 
 ## Testing chipset manufacturer filter
@@ -83,3 +88,11 @@ Filter tag appears when one of the slider buttons are moved, and changes accordi
 * Click on second supreme category in breadcrumbs (originally first parent category)
 * Click on third supreme category in breadcrumbs
 
+## Testing hamburger menu
+* Click on hamburger menu icon
+* Click again to close hamburger menu
+
+## Highlighted products carousel
+* Check default highlights
+* Click right button on the carousel
+* Click on left button on the carousel
