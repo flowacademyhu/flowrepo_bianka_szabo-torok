@@ -1,6 +1,5 @@
-const path = require("path");
 const { openBrowser, goto, $, hover, click, link, below, dragAndDrop, mouseAction, waitFor, closeBrowser, to, scrollDown, focus, scrollUp, reload, 
-        press, write, clear, resizeWindow, scrollTo, } = require("taiko");
+        press, write, clear, resizeWindow, scrollTo, currentURL, goBack, } = require("taiko");
 const assert = require("assert");
 const { Console } = require("console");
 const expect = require("chai").expect;
@@ -20,6 +19,7 @@ beforeSuite(async () => {
 afterSuite(async()=>{
   await closeBrowser()
 });
+
 
 step("Hover over first product to see available webshop options", async function() {
 	let activeView = "shop-list__layout-select__item is-active";
@@ -69,27 +69,26 @@ step("Click on minimum side button of the slider and move it right", async funct
   let itemsCountTextDefault = (await $(`div.shop-list__header__item-count`).text()).split("");
   let itemsCountDefault = [];
   itemsCountDefault.push(itemsCountTextDefault[1], itemsCountTextDefault[2], itemsCountTextDefault[3]);
-  itemsCountDefault = parseInt(itemsCountDefault.join("")); //rows 73-77: Storing itemcount and price sliders lowest price in variables before any change.
+  itemsCountDefault = parseInt(itemsCountDefault.join("")); 
   let lowestPriceDefault = parseInt(await $(`aside.sidebar-layout__side.sidebar-layout__side--border.shop-filter-sidebar.js-shop-filter-sidebar div.noUi-handle.noUi-handle-lower`).attribute("aria-valuetext"));
   await mouseAction($(`div[data-collapse-id-value="price"] .noUi-handle.noUi-handle-lower`), 'press', {x:0,y:0});
   await mouseAction($(`div[data-collapse-id-value="price"] .noUi-handle.noUi-handle-lower`), 'move', {x:60,y:0});
-  await mouseAction($(`div[data-collapse-id-value="price"] .noUi-handle.noUi-handle-lower`), 'release', {x:60,y:0}); //For some reason, dragAndDrop didn't work for the left side
-  let lowestPriceString = await $(`aside.sidebar-layout__side.sidebar-layout__side--border.shop-filter-sidebar.js-shop-filter-sidebar div.noUi-handle.noUi-handle-lower`).attribute("aria-valuetext");
-  let lowestPriceFiltered = parseInt(lowestPriceString);
+  await mouseAction($(`div[data-collapse-id-value="price"] .noUi-handle.noUi-handle-lower`), 'release', {x:60,y:0}); 
+  let lowestPriceFiltered = parseInt(await $(`aside.sidebar-layout__side.sidebar-layout__side--border.shop-filter-sidebar.js-shop-filter-sidebar div.noUi-handle.noUi-handle-lower`).attribute("aria-valuetext"));
   let itemsCountTextFiltered = (await $(`div.shop-list__header__item-count`).text()).split("");
   let itemsCountFiltered = [];
   itemsCountFiltered.push(itemsCountTextFiltered[1], itemsCountTextFiltered[2], itemsCountTextFiltered[3]);
-  itemsCountFiltered = parseInt(itemsCountFiltered.join("")); //rows 81-86: Storing itemcount and price sliders lowest price in variables after minimum slider is moved right.
+  itemsCountFiltered = parseInt(itemsCountFiltered.join("")); 
   expect(lowestPriceFiltered > lowestPriceDefault).to.be.true;
-  expect(itemsCountFiltered <= itemsCountDefault).to.be.true; // we expect changes in itemcount and lowest price, altough there is chance that itemcount won't change in some cases. 
-  expect(await (await $(`li.shop-list__filter-tags__item`).element(0)).isVisible()).to.be.true; //pricefilter tag is expected to appear in the header of the page.
+  expect(itemsCountFiltered <= itemsCountDefault).to.be.true; 
+  expect(await (await $(`li.shop-list__filter-tags__item`).element(0)).isVisible()).to.be.true; 
   let lowestPriceFilteredString = lowestPriceFiltered.toString();
   let filteredMimimumPriceString = (await(await $(`li.shop-list__filter-tags__item`).element(0)).text());
   let filteredMimimumPriceNoSpaces = filteredMimimumPriceString.replace(/\s+/g, '');
-  expect(filteredMimimumPriceNoSpaces).to.include(lowestPriceFilteredString); //rows 90-93: we check if slider input price matches slider filter tag price 
+  expect(filteredMimimumPriceNoSpaces).to.include(lowestPriceFilteredString); 
 }); 
 
-step("Click on maximum side of the slider and move it left", async function() { //assertions are the same as at minimum side slider change
+step("Click on maximum side of the slider and move it left", async function() { 
   let itemsCountTextDefault = (await $(`div.shop-list__header__item-count`).text()).split("");
   let itemsCountDefault = [];
   itemsCountDefault.push(itemsCountTextDefault[1], itemsCountTextDefault[2], itemsCountTextDefault[3]);
@@ -101,7 +100,7 @@ step("Click on maximum side of the slider and move it left", async function() { 
   let itemsCountFiltered = [];
   itemsCountFiltered.push(itemsCountTextFiltered[1], itemsCountTextFiltered[2], itemsCountTextFiltered[3]);
   itemsCountFiltered = parseInt(itemsCountFiltered.join(""));
-  expect (highestPriceDefault > highestPriceFiltered).to.be.true
+  expect (highestPriceDefault > highestPriceFiltered).to.be.true;
   expect(itemsCountFiltered <= itemsCountDefault).to.be.true;
   expect(await (await $(`li.shop-list__filter-tags__item`).element(0)).isVisible()).to.be.true;
   let highestPriceFilteredString = highestPriceFiltered.toString();
@@ -114,21 +113,18 @@ step("Click on 'Manufacturer' button to see the dropdown list", async function()
   await hover($(`div.shop-list__filter-tags-layout-select-wrapper`));
 	await click(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control`).element(1));
   let manufacturersArray = (await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li[class="shop-filter-options__item"]`).elements());
-  expect(manufacturersArray).to.have.lengthOf(5); //checks if there is a limited number (5) of manufacturers in the dropdown, before we click on "show all" button
-  expect(await $(`div.dropdown-control__dropdown.js-dropdown-control-dropdown ul.shop-filter-options-toggle`).isVisible()).to.be.true; //checks if "show all button is visible"
-  expect(await $(`div.dropdown-control__dropdown.js-dropdown-control-dropdown input[type="checkbox"]`).isVisible()).to.be.true; //checks if checkboxes are visible
+  expect(manufacturersArray).to.have.lengthOf(5); 
+  expect(await $(`div.dropdown-control__dropdown.js-dropdown-control-dropdown ul.shop-filter-options-toggle`).isVisible()).to.be.true; 
+  expect(await $(`div.dropdown-control__dropdown.js-dropdown-control-dropdown input[type="checkbox"]`).isVisible()).to.be.true; 
 });
 
 step("Click on 'Show all' button", async function() {
 	await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open a.shop-filter-options__show-link`)); 
   let dropdown = (await $(`div.shop-list__filter.dropdown-control.js-dropdown-control:nth-of-type(2) ul:first-of-type`).attribute("class"));
   expect(dropdown).to.equal("shop-filter-options shop-filter-options--nested is-show-all");
-  //row 127-129: checks if "Show all" is activated
   expect(await $(`div.shop-list__filters-order--wrapper div.shop-list__filter.dropdown-control.js-dropdown-control.is-open input[placeholder="Filter..."]`).isVisible()).to.be.true
-  //row130 checks if filter inputfield is visible
-  await hover($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item.shop-filter-options__item--show-less`))
+  await hover($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item.shop-filter-options__item--show-less`));
   expect(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item.shop-filter-options__item--show-less`).isVisible()).to.be.true
-  //row132-133: checks if "less" button is visible
 });
 
 step("Click on a checkbox than another checkbox", async function() {
@@ -136,8 +132,8 @@ step("Click on a checkbox than another checkbox", async function() {
   await hover($(`div.shop-list__filter-tags-layout-select-wrapper`));
 	await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(8) span.control__indicator`));
   await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(10) span.control__indicator`));
-  let itemsCountFiltered = await ($(`div.shop-list__header__item-count`).text()); //rows 139-141: checks if checkboxes are clickable with multiple checkbox clicked
-  expect(itemsCountDefault).to.not.equal(itemsCountFiltered) // checks if itemscount changed after filtering by checkboxes
+  let itemsCountFiltered = await ($(`div.shop-list__header__item-count`).text()); 
+  expect(itemsCountDefault).to.not.equal(itemsCountFiltered);
   await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(8) span.control__indicator`));
   await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(10) span.control__indicator`));
 });
@@ -147,21 +143,18 @@ step("Click on 'Pickup' button", async function() {
   await hover($(`div.shop-list__filter-tags-layout-select-wrapper`));
 	await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control:nth-of-type(3)`));
   let pickupArray = (await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li[class="shop-filter-options__item"]`).elements());
-  expect(pickupArray).to.have.lengthOf(5); //checks if there is a limited number (5) of manufacturers in the dropdown, before we click on "show all" button
-  expect(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open ul.shop-filter-options-toggle`).isVisible()).to.be.true; //checks if "show all button is visible"
-  expect(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open span.control__indicator`).isVisible()).to.be.true; //checks if checkboxes are visible
+  expect(pickupArray).to.have.lengthOf(5); 
+  expect(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open ul.shop-filter-options-toggle`).isVisible()).to.be.true; 
+  expect(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open span.control__indicator`).isVisible()).to.be.true; 
 });
 
 step("Click on 'Show all' button in 'Pickup' filter", async function() {
 	await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open a.shop-filter-options__show-link`)); 
   let dropdown = (await $(`div.shop-list__filter.dropdown-control.js-dropdown-control:nth-of-type(3) ul:first-of-type`).attribute("class"));
   expect(dropdown).to.equal("shop-filter-options shop-filter-options--nested is-show-all");
-  //row 156-158: checks if "Show all" is activated
   expect(await $(`div.shop-list__filters-order--wrapper div.shop-list__filter.dropdown-control.js-dropdown-control.is-open input[placeholder="Filter..."]`).isVisible()).to.be.true
-  //row 161 checks if filter inputfield is visible
   await hover($(`div.shop-list__filter-tags-layout-select-wrapper`));
   expect(await $(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item.shop-filter-options__item--show-less`).isVisible()).to.be.true
-  //row 162-163: checks if "less" button is visible;
 });
 
 
@@ -170,8 +163,8 @@ step("Click on a checkbox than another checkbox in 'Pickup filter'", async funct
   await hover($(`div.shop-list__filter-tags-layout-select-wrapper`));
 	await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(6) span.control__indicator`));
   await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(8) span.control__indicator`));
-  let itemsCountFiltered = await ($(`div.shop-list__header__item-count`).text()); //rows 170-172: checks if checkboxes are clickable with multiple checkbox clicked
-  expect(itemsCountDefault).to.not.equal(itemsCountFiltered) // checks if itemscount changed after filtering by checkboxes;
+  let itemsCountFiltered = await ($(`div.shop-list__header__item-count`).text()); 
+  expect(itemsCountDefault).to.not.equal(itemsCountFiltered);
   await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(6) span.control__indicator`));
   await click($(`div.shop-list__filter.dropdown-control.js-dropdown-control.is-open li.shop-filter-options__item:nth-of-type(8) span.control__indicator`));
 });
@@ -179,10 +172,10 @@ step("Click on a checkbox than another checkbox in 'Pickup filter'", async funct
 step("Click on 'Order' dropdown menu", async function() {
 	await click($(`div[class="select-input shop-list__order-select select-input--order-icon@mobile"]`));
   let orderOptions = await $(`div[class*="select-input shop-list__order-select select-input--order-icon@mobile"] option`).elements();
-  expect(orderOptions.length).to.equal(5); //checks if there are 5 order options
+  expect(orderOptions.length).to.equal(5); 
   let defaultOrder = (await $(`div[class*="select-input shop-list__order-select select-input--order-icon@mobile"] option:first-of-type`).element(0));
-  let defaultOrderText = await defaultOrder.text()
-  expect(defaultOrderText).to.contain("Popular first"); // checks if "Popular first" order is default
+  let defaultOrderText = await defaultOrder.text();
+  expect(defaultOrderText).to.contain("Popular first"); 
 });
 
 step("Click on 'Cheap first' option", async function() {
@@ -223,6 +216,7 @@ step("Click on 'Discount' option", async function() {
 step("Click in the search input", async function() {
   await hover($(`input[placeholder="Search in category..."]`));
   await scrollUp();
+  await click($(`li.shop-list__filter-tags__item:first-of-type i.fas.fa-times.shop-list__filter-tags__icon`));
   await click($(`input[placeholder="Search in category..."]`));
 });
 
@@ -234,12 +228,12 @@ step("Write <word> in the search field", async function(word) {
   let itemsCountFiltered = await $(`div.shop-list__header__item-count`).text()
   assert.notEqual(itemsCountDefault, itemsCountFiltered);
   await clear($(`input.shop-list__search__input.js-width-dynamic`));
-  await press('Enter');
+  await press('Enter'); 
 });
 
 
 step("Scroll down to the bottom of product list", async function() {
-	await hover ($(`div.product-list__show-more-button-wrapper`));
+	await hover($(`div.product-list__show-more-button-wrapper`));
   let showMore = await $(`div.product-list__show-more-button-wrapper`).isVisible();
   let previousPageButton = await $(`div.forum-pagination.forum-pagination--messages button:first-of-type`).attribute("class");
   expect(showMore).to.be.true; 
@@ -301,9 +295,8 @@ step("Click on dropdown filter menus and click on radio buttons: <bt1> <bt2> <bt
     await scrollUp(800)
     await click(row.cells[0]);
   }
-  await focus($(`li.shop-list__filter-tags__item:first-of-type i.fas.fa-times.shop-list__filter-tags__icon`));
-  await click($(`li.shop-list__filter-tags__item:first-of-type i.fas.fa-times.shop-list__filter-tags__icon`));
 });
+
 
 step("Click on 'compare' checkbox inside a product card", async function() {
     await hover($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12`));
@@ -405,7 +398,8 @@ step("Scroll to bottom of the page", async function() {
 
 step("Click on 'Back to top of the page button'", async function() {
 	await click($(`a.site-footer__back-to-top-link.js-site-footer-back-to-top-link`));
-  expect(await $(`li.breadcrumb__item.breadcrumb__item--active`).isVisible()).to.be.true;
+  await waitFor(3000);
+  expect(await $(`div.shop-list__filters-order--wrapper`).isVisible()).to.be.true;
 });
 
 
@@ -518,4 +512,143 @@ step("Click on left button on the carousel", async function() {
   }
   expect(await carouselRightButton.isVisible()).to.be.true;
   expect(await carouselLeftButton.isVisible()).to.be.false;
+});
+
+step("Click on PC bulider button", async function() {
+	await focus($(`a[title="PC builder"]`));
+  await click($(`a[title="PC builder"]`));
+  assert.equal((await $(`li.breadcrumb__item.breadcrumb__item--active`).text()).toLowerCase(), " pc builder");
+  assert.equal((await $(`span.builder-header__title`).text()).toLowerCase(), "pc builder");
+  expect(await $(`a.button.button--secondary.button--lg.button--icon--right.builder-header__button`).exists()).to.be.true;
+  let defaultItemCounter = await $(`span.builder__nav-item__counter`).text();
+  defaultItemCounter = defaultItemCounter.split("");
+  let defaultItemCounterNumbers = [];
+  defaultItemCounterNumbers.push(defaultItemCounter[1], defaultItemCounter[2]);
+  defaultItemCounterNumbers = parseInt(defaultItemCounterNumbers.join(""));
+  let configListElements = await $(`div.content-card--shadow.content-card--hoveranim`).elements();
+  assert.equal(defaultItemCounterNumbers, configListElements.length); 
+});
+
+step("Click 'start empty' button", async function() {
+	await click($(`a.button.button--secondary.button--lg.button--icon--right.builder-header__button`));
+  assert.equal(await $(`div.builder-secondary-header div[class="builder-secondary-header__price u-hide@mobile"]`).text(), "0 Ft");
+  let numberOfSections = await $(`h3.builder-section__title`).elements();
+  expect(numberOfSections.length).to.equal(4);
+  let numberOfAddButtons = await $(`a.button.button--secondary.button--icon--right.builder-component__button.builder-component__button--add`).elements();
+  expect(numberOfAddButtons.length).to.equal(17);
+});
+
+
+step("Hover over a product card", async function() {
+	await hover($(`span.site-nav__shop-menu.js-shop-menu-trigger`));
+  await hover((await $(`span.menu__link--label`).elements())[1]);
+  await click(link('Gamer videocard'));
+  await hover($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:first-of-type div.u-shop-card-hover.js-shop-card-hover a.shop-card__overlay-link`));
+  
+});
+
+step("Click on the product card (name or pictrue)", async function() {
+	await click($(`div.product-list__grid--cards__item.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12.grid-col-xl-2-12:first-of-type div.u-shop-card-hover.js-shop-card-hover a.shop-card__overlay-link`));
+  let breadcrumbsElements = await $(`li[class*="breadcrumb__item"]`).elements();
+  expect(breadcrumbsElements.length).to.equal(5);
+  let productUrl = await currentURL();
+  expect(productUrl).to.contain("https://iponcomp.com/shop/product/");
+  await goBack();
+});
+
+step("Click on minimum button and move it right", async function() {
+  let itemsCountDefault = await $(`div.shop-list__header__item-count`).text();
+  let lowestPriceDefault = parseInt(await $(`div[data-collapse-id-value="guarantee-month"] div.noUi-handle.noUi-handle-lower`).attribute("aria-valuetext"));
+	await mouseAction($(`div[data-collapse-id-value="guarantee-month"] .noUi-handle.noUi-handle-lower`), 'press', {x:0,y:0});
+  await mouseAction($(`div[data-collapse-id-value="guarantee-month"] .noUi-handle.noUi-handle-lower`), 'move', {x:60,y:0});
+  await mouseAction($(`div[data-collapse-id-value="guarantee-month"] .noUi-handle.noUi-handle-lower`), 'release', {x:60,y:0}); 
+  let lowestPriceFiltered = parseInt(await $(`div[data-collapse-id-value="guarantee-month"] div.noUi-handle.noUi-handle-lower`).attribute("aria-valuetext"));
+  itemsCountFiltered = await $(`div.shop-list__header__item-count`).text();
+  expect(itemsCountDefault >= itemsCountFiltered);
+  assert.notEqual(lowestPriceDefault, lowestPriceFiltered);
+});
+
+step("Click on maximum button and move it left", async function() {
+	let itemsCountDefault = await $(`div.shop-list__header__item-count`).text();
+  let maxPriceDefault = parseInt(await $(`div[data-collapse-id-value="guarantee-month"] div.noUi-handle.noUi-handle-upper`).attribute("aria-valuetext"));
+	await dragAndDrop($(`div[data-collapse-id-value="guarantee-month"] div.noUi-handle.noUi-handle-upper`), {left:60});
+  let itemsCountFiltered = await $(`div.shop-list__header__item-count`).text();
+  let maxPriceFiltered = parseInt(await $(`div[data-collapse-id-value="guarantee-month"] div.noUi-handle.noUi-handle-upper`).attribute("aria-valuetext"));
+  assert.notEqual(itemsCountDefault, itemsCountFiltered);
+  assert.notEqual(maxPriceDefault, maxPriceFiltered);
+});
+
+step("Disable filter", async function() {
+  await scrollTo($(`div.site-footer__header`));
+  await click($(`a.site-footer__back-to-top-link.js-site-footer-back-to-top-link`));
+	await click($(`li.shop-list__filter-tags__item:first-of-type i.fas.fa-times.shop-list__filter-tags__icon`));
+});
+
+step("Click on 'notebook search' button", async function() {
+  await click($(`a[title="Notebook search"] span.shop-special-button__text`));
+	let title = await $(`div.search-notebook__header-title`).text();
+  let progressSteps = await $(`li[class*="progress__step js-progress__step"]`).elements();
+  assert.equal(title.toLocaleLowerCase(), ("Notebook search").toLocaleLowerCase());
+  expect(progressSteps.length).to.equal(4);
+  expect(await $(`div.grid-col-1.grid-col-md-4-12.grid-col-lg-3-12`).isVisible()).to.be.true;
+  expect(await $(`button.button.button--secondary.button--icon--right`).isVisible()).to.be.true;
+  expect(await $(`div.search-notebook__header-buttons a.button.button--secondary-hollow`).isVisible()).to.be.true;
+  let progressStepActive = await($(`div.progress__bar.js-progress__bar.progress__bar--current.progress__bar--active-1`).exists());
+  expect(progressStepActive).to.be.true;
+});
+
+step("Click on 'next' button", async function() {
+	await click($(`button.button.button--secondary.button--icon--right`));
+  let progressStepActive = await($(`div.progress__bar.js-progress__bar.progress__bar--current.progress__bar--active-2`).exists());
+  expect(progressStepActive).to.be.true;
+});
+
+step("Choose a manufacturer", async function() {
+	await click($(`div.grid-col-1-2.grid-col-md-4-12.grid-col-lg-2-12:nth-of-type(5) a.search-option__link-overlay`));
+  await click($(`button.button.button--secondary.button--icon--right`));
+});
+
+step("Choose screen size", async function() {
+  let progressStepActive = await($(`div.progress__bar.js-progress__bar.progress__bar--current.progress__bar--active-3`).exists());
+  expect(progressStepActive).to.be.true;
+	let resultCountDefault = await $(`span.search-result__count`).text(); 
+  await dragAndDrop($(`div.noUi-handle.noUi-handle-upper`), {left: 100});
+  let resultCountFiltered = await $(`span.search-result__count`).text(); 
+  expect(resultCountDefault >= resultCountFiltered);
+});
+
+step("Choose extras", async function() {
+  await click($(`button.button.button--secondary.button--icon--right`));
+  let progressStepActive = await($(`div.progress__bar.js-progress__bar.progress__bar--current.progress__bar--active-4`).exists());
+  expect(progressStepActive).to.be.true;
+  let typesOfFilters = await $(`ul.shop-filter-options.shop-filter-options--nested`).elements();
+  expect(typesOfFilters.length).to.equal(28);
+  await click($(`button.button.button--secondary.button--icon--right`));
+  let notebookUrl = await currentURL();
+  expect(notebookUrl).to.contain("https://iponcomp.com/shop/group/notebook-pc/notebook/");
+  await hover($(`span.site-nav__shop-menu.js-shop-menu-trigger`));
+  await hover((await $(`span.menu__link--label`).elements())[1]);
+  await click(link('Gamer videocard'));
+});
+
+
+step("Activate some filters", async function() {
+  let numberOfActiveFilters = await $(`li.shop-list__filter-tags__item`).elements();
+  expect(numberOfActiveFilters.length).to.equal(1);
+	await click($(`div[data-collapse-id-value="brand"] li.shop-filter-options__item:nth-of-type(4) span.control__indicator`));
+  let numberOfActiveFiltersOneTriggered = await $(`li.shop-list__filter-tags__item`).elements();
+  expect(numberOfActiveFiltersOneTriggered.length).to.equal(2);
+  await click($(`div[data-collapse-id-value="feature-38"] li.shop-filter-options__item:first-of-type span.control__indicator`));
+  let numberOfActiveFiltersTwoTriggered = await $(`li.shop-list__filter-tags__item`).elements();
+  expect(numberOfActiveFiltersTwoTriggered.length).to.equal(3);
+});
+
+step("Click 'Delete all' filters button", async function() {
+	let itemsCountFiltered = await $(`div.shop-list__header__item-count`).text();
+  await focus($(`a.shop-filter-title__clear-link.js-clear-shop-filters`));
+  await click($(`a.shop-filter-title__clear-link.js-clear-shop-filters`));
+  let itemsCountNoFilters = await $(`div.shop-list__header__item-count`).text();
+  assert.notEqual(itemsCountFiltered, itemsCountNoFilters); 
+  let numberOfActiveFilters = await $(`li[class="shop-list__filter-tags__item"]`).elements();
+  expect(numberOfActiveFilters.length).to.equal(1);
 });

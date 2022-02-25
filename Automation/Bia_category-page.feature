@@ -266,10 +266,10 @@ Scenario: Category subpages can be reached from homepage
 
 #015
 
- Scenario: Recommended products are shown on category page
-     Given I am at the bottom of video card category page, I see 5 of the recommended products in a carousel
-     When I click on the next button, which is an icon with a white arrow in purple background in the right side of the carousel
-     Then I should see the next 6 recommended products
+ Scenario: Highlighted products are shown on category page
+     Given I am at the bottom of video card category page, I see 5 of the highlighted products in a carousel
+     When I click on the next button, which is an icon with a white arrow in purple background on the right side of the carousel
+     Then I should see the next 5 highlighted products
       And a 'previous' button should appear in the left side of the carousel
 
 #016
@@ -278,8 +278,8 @@ Scenario: Category subpages can be reached from homepage
      Given I am on video card category page
      When I click on the 'PC builder' button
      Then I should see the PC builder subpage 
-      And video card products are also available with a limited number of filters, 
-      And video cards are shown in a list view
+      And I can add components to the build 
+      And I can start a new assembly
 
 #017
 
